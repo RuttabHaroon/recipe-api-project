@@ -8,6 +8,7 @@ from django.core.management import call_command
 from django.db.utils import OperationalError
 from django.test import SimpleTestCase
 
+
 @patch('core.management.commands.wait_for_db.Command.check')
 class CommandTests(SimpleTestCase):
     """Test commands."""
@@ -19,19 +20,13 @@ class CommandTests(SimpleTestCase):
         call_command('wait_for_db')
 
         patched_check.assert_called_once_with(databases=['default'])
-    
+
     @patch('time.sleep')
     def test_wait_for_db(self, patched_sleep, patched_check):
         """Test waiting for database when getting OperationError."""
-        
-        """Used to Raise Error. 
-        The first 2 time raise a Psycopg2Error(donated by  [Psycopg2Error] * 2)"
-        After that next 3 times raise the OperationalError.
-        On 6th Time return true
-        """
         patched_check.side_effect = [Psycopg2Error] * 2 + \
             [OperationalError] * 3 + [True]
-        
+
         call_command('wait_for_db')
 
         self.assertEqual(patched_check.call_count, 6)
